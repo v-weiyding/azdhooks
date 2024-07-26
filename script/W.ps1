@@ -1,0 +1,1 @@
+Write-Output "preprovision执行---------1.Test Local file hook 7.Hook File path is relative paths"

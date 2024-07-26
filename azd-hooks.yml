@@ -1,0 +1,107 @@
+name: Run azd hooks
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+parameters:
+  - name: templateName
+    displayName: Template Name
+    type: string
+    default: todo-nodejs-mongo
+  - name: templateBranch
+    displayName: Template Name
+    type: string
+    default: pr/3976
+
+variables:
+  - name: templatePath
+    value: template
+  - name: ScriptPath
+    value: script/
+    # hooks dir / azure.yaml    ls   git上的文件是否copy
+
+jobs:
+  - job: RunHooks
+    steps:
+      - task: Bash@3
+        # name: Install
+        displayName: Install Daily AZD
+        inputs:
+          azureSubscription: test-connection
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+
+            curl -fsSL https://aka.ms/install-azd.sh | bash -s -- --version daily
+
+            azd version
+            azd auth login
+
+      - task: UseNode@1
+        displayName: Setup Node.js
+        inputs:
+          version: "20.x" # string. Version. Default: 10.x.
+
+      - task: Bash@3
+        displayName: Install template
+        inputs:
+          targetType: inline
+          script: |
+            mkdir -p $(templatePath)
+
+            pushd $(templatePath)
+
+            azd init -t ${{ parameters.templateName }} -b ${{ parameters.templateBranch }}
+
+            popd
+
+      - task: Bash@3
+        displayName: Replace azure.yaml file
+        inputs:
+          targetType: inline
+          script: |
+
+            yamlFile=$(cat $(ScriptPath)/azure.yaml)
+            psFile=$(cat $(ScriptPath)/W.ps1)
+            shFile=$(cat $(ScriptPath)/L.sh)
+
+            pushd $(templatePath)
+
+
+            # azure.yaml
+            echo $yamlFile > azure.yaml
+
+            # hooks文件
+            mkdir -p hooks
+            pushd hooks
+            echo $psFile > W.ps1
+            echo $shFile > L.sh
+
+            popd
+            popd
+
+      - task: Bash@3
+        displayName: Run azd hooks
+        inputs:
+          targetType: inline
+          script: |
+
+            pushd $(templatePath)
+
+            command_list=(
+              "azd up"
+              "azd package"
+              "azd provision"
+              "azd deploy"
+              "azd restore"
+              "azd down"
+            )
+
+            for command in "${command_list[@]}"; do
+                echo "Processing $command ======================================"
+
+                $command
+            done
+
+            popd

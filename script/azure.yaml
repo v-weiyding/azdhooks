@@ -1,0 +1,88 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: todo-nodejs-mongo
+metadata:
+  template: todo-nodejs-mongo@0.0.1-beta
+workflows:
+  up: 
+    steps:
+      - azd: provision
+      - azd: deploy --all
+services:
+  web:
+    project: ./src/web
+    dist: dist
+    language: js
+    host: appservice
+    hooks:
+      # Creates a temporary `.env.local` file for the build command. Vite will automatically use it during build.
+      # The expected/required values are mapped to the infrastructure outputs.
+      # .env.local is ignored by git, so it will not be committed if, for any reason, if deployment fails.
+      # see: https://vitejs.dev/guide/env-and-mode
+      # Note: Notice that dotenv must be a project dependency for this to work. See package.json.
+      prepackage:
+        windows:
+          shell: pwsh
+          run: 'echo "VITE_API_BASE_URL=""$env:API_BASE_URL""" > .env.local ; echo "VITE_APPLICATIONINSIGHTS_CONNECTION_STRING=""$env:APPLICATIONINSIGHTS_CONNECTION_STRING""" >> .env.local'
+        posix:
+          shell: sh
+          run: 'echo VITE_API_BASE_URL=\"$API_BASE_URL\" > .env.local && echo VITE_APPLICATIONINSIGHTS_CONNECTION_STRING=\"$APPLICATIONINSIGHTS_CONNECTION_STRING\" >> .env.local'    
+      postdeploy:
+        windows:
+          shell: pwsh
+          run: 'rm .env.local'
+        posix:
+          shell: sh
+          run: 'rm .env.local'
+  api:
+    project: ./src/api
+    language: js
+    host: appservice
+hooks:
+  # Creates a temporary `.env.local` file for the build command. Vite will automatically use it during build.
+  # The expected/required values are mapped to the infrastructure outputs.
+  # .env.local is ignored by git, so it will not be committed if, for any reason, if deployment fails.
+  # see: https://vitejs.dev/guide/env-and-mode
+  # Note: Notice that dotenv must be a project dependency for this to work. See package.json.
+  preprovision:
+    windows:
+      shell: pwsh
+      run: ./hook/preprovision.ps1
+      interactive: true
+      continueOnError: false
+  postprovision:
+    windows:
+      shell: pwsh
+      run: 'Write-Output "postprovision执行--------2.Test inline script hook-9.Multiple hooks"'
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./hook/xxx.sh
+      interactive: true
+      continueOnError: false
+  preup:
+    windows:
+      shell: pwsh
+      run: 'Write-Output "preup执行  $env:AZURE_ENV_NAME-------3.Test Azd vars 4.Interactive set"'
+      interactive: true
+      continueOnError: false
+  prepackage: 
+    windows:
+      shell: pwsh
+      run: Write-Output "prepackage执行------"
+      interactive: true
+      continueOnError: false
+  prerestore: #错误也执行 6.Set the "continueOnError" flag 8.Invalid file paths
+    windows:
+      shell: pwsh
+      run: ./hook/xxx.ps1
+      interactive: true
+      continueOnError: true
+  predown: # 不显示  interactive: false
+    windows:
+      shell: pwsh
+      run: Write-Output "predown执行------"
+      interactive: false
+      continueOnError: false
+
