@@ -24,13 +24,23 @@ variables:
 jobs:
   - job: RunHooks
     steps:
+
       - task: Bash@3
         # name: Install
         displayName: Install Daily AZD
         inputs:
-          azureSubscription: test-connection
+          # azureSubscription: test-connection
           scriptType: bash
-          scriptLocation: inlineScript
+          # scriptLocation: inlineScript
+          inlineScript: |
+            echo "11111111111111111111111111111=========================="
+
+
+      - task: Bash@3
+        # name: Install
+        displayName: Install Daily AZD
+        inputs:
+          scriptType: bash
           inlineScript: |
 
             curl -fsSL https://aka.ms/install-azd.sh | bash -s -- --version daily
