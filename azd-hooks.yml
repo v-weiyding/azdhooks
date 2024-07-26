@@ -18,7 +18,7 @@ variables:
   - name: templatePath
     value: template
   - name: ScriptPath
-    value: script/
+    value: script
     # hooks dir / azure.yaml    ls   git上的文件是否copy
 
 jobs:
