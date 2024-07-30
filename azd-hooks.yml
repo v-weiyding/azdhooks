@@ -14,7 +14,6 @@ parameters:
     type: string
     default: pr/3976
 
-
 variables:
   - name: templatePath
     value: template
@@ -24,7 +23,6 @@ variables:
 jobs:
   - job: RunHooks
     steps:
-
       - task: Bash@3
         displayName: Install azd
         inputs:
@@ -33,7 +31,7 @@ jobs:
 
             # test 
             ls
-            
+
             # 可能会要求输入密码 sudo
             curl -fsSL https://aka.ms/install-azd.sh | bash -s -- --version daily
 
@@ -53,9 +51,8 @@ jobs:
 
             # azd auth login --client-id ${{ parameters.clientId }}  --tenant-id ${{ parameters.tenantId }} --client-secret ${{ parameters.clientSecret }}
 
-
       - task: Bash@3
-        displayName: Install template 
+        displayName: Install template
         inputs:
           targetType: inline
           script: |
@@ -92,9 +89,6 @@ jobs:
             popd
             popd
 
-
-
-
       - task: AzureCLI@2
         displayName: Run azd hooks
         inputs:
@@ -107,29 +101,15 @@ jobs:
 
             pushd $(templatePath)
 
-            command_list=(
+            azd up --no-prompt
 
+            sleep 10
 
-              "azd package"
-              "azd provision"
-              "azd deploy"
+            azd down --purge --force
 
-              "azd up"
-              "azd restore"
-              "azd down"
-            )
-
-            for command in "${command_list[@]}"; do
-                echo "Processing $command ======================================"
-
-                $command --no-prompt
-
-                sleep 5
-            done
 
             popd
 
-        
       - task: Bash@3
         displayName: Run azd hooks test
         inputs:
@@ -140,24 +120,11 @@ jobs:
 
             pushd $(templatePath)
 
-            command_list=(
+            azd up --no-prompt
 
+            sleep 10
 
-              "azd package"
-              "azd provision"
-              "azd deploy"
+            azd down --purge --force
 
-              "azd up"
-              "azd restore"
-              "azd down"
-            )
-
-            for command in "${command_list[@]}"; do
-                echo "Processing $command ======================================"
-
-                $command
-
-                sleep 5
-            done
 
             popd

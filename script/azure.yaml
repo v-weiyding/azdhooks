@@ -38,6 +38,22 @@ services:
     project: ./src/api
     language: js
     host: appservice
+    hooks:
+      predeploy:
+        windows:
+          shell: pwsh
+          run: |
+            Write-Output "AZD HOOK LOG : predeploy api ================="
+            Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
+          interactive: true
+          continueOnError: false
+        posix:
+          shell: sh
+          run: |
+            echo "AZD HOOK LOG : predeploy api ================="
+            echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
+          interactive: true
+          continueOnError: false
 hooks:
   # Creates a temporary `.env.local` file for the build command. Vite will automatically use it during build.
   # The expected/required values are mapped to the infrastructure outputs.
@@ -51,14 +67,14 @@ hooks:
       shell: pwsh
       run: |
         Write-Output "AZD HOOK LOG : preup ================="
-        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
     posix:
       shell: sh
       run: |
         echo "AZD HOOK LOG : preup ================="
-        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
   postup:
@@ -79,14 +95,14 @@ hooks:
       shell: pwsh
       run: |
         Write-Output "AZD HOOK LOG : preprovision ================="
-        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
     posix:
       shell: sh
       run: |
         echo "AZD HOOK LOG : preprovision ================="
-        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
   postprovision:
@@ -108,7 +124,7 @@ hooks:
       shell: pwsh
       run: |
         Write-Output "AZD HOOK LOG : prepackage ================="
-        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
         Write-Output "test continueOnError "
         Write-Outpu
       interactive: true
@@ -117,7 +133,7 @@ hooks:
       shell: sh
       run: |
         echo "AZD HOOK LOG : prepackage ================="
-        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
         echo "test continueOnError "
         ech
       interactive: true
@@ -135,8 +151,39 @@ hooks:
       continueOnError: false
 
   # 4. azd deploy 
-  # test Invalid file paths
+  # test Interactive set false
   predeploy:
+    windows:
+      shell: pwsh
+      run: ./xxx/1.ps1
+      interactive: false
+      continueOnError: true
+    posix:
+      shell: sh
+      run: ./xxx/1.sh
+      interactive: false
+      continueOnError: true
+  postdeploy:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Output "AZD HOOK LOG : postdeploy ================="
+        Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
+        Write-Output "test Interactive set false "
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : postdeploy ================="
+        echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
+        echo "test Interactive set false "
+      interactive: true
+      continueOnError: false
+
+  # 5. azd restore 
+  # test Invalid file paths
+  prerestore:
     windows:
       shell: pwsh
       run: ./xxx/1.ps1
@@ -147,52 +194,21 @@ hooks:
       run: ./xxx/1.sh
       interactive: true
       continueOnError: true
-  postdeploy:
+  postrestore:
     windows:
       shell: pwsh
       run: |
-        Write-Output "AZD HOOK LOG : postdeploy ================="
-        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "AZD HOOK LOG : postrestore ================="
+        Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
         Write-Output "test Invalid file paths "
       interactive: true
       continueOnError: false
     posix:
       shell: sh
       run: |
-        echo "AZD HOOK LOG : postdeploy ================="
-        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "AZD HOOK LOG : postrestore ================="
+        echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
         echo "test Invalid file paths "
-      interactive: true
-      continueOnError: false
-
-  # 5. azd restore 
-  # test Interactive set false
-  prerestore:
-    windows:
-      shell: pwsh
-      run: ./hooks/1.ps1
-      interactive: false
-      continueOnError: false
-    posix:
-      shell: sh
-      run: ./hooks/1.sh
-      interactive: false
-      continueOnError: false
-  postrestore:
-    windows:
-      shell: pwsh
-      run: |
-        Write-Output "AZD HOOK LOG : postrestore ================="
-        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
-        Write-Output "test Interactive set false "
-      interactive: true
-      continueOnError: false
-    posix:
-      shell: sh
-      run: |
-        echo "AZD HOOK LOG : prerestore ================="
-        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
-        echo "test Interactive set false "
       interactive: true
       continueOnError: false
 
@@ -203,14 +219,14 @@ hooks:
       shell: pwsh
       run: |
         Write-Output "AZD HOOK LOG : predown ================="
-        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "AZD HOOK LOG : AZURE_ENV_NAME $env:AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
     posix:
       shell: sh
       run: |
         echo "AZD HOOK LOG : predown ================="
-        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "AZD HOOK LOG : AZURE_ENV_NAME $AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
   postdown:
