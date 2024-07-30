@@ -4,7 +4,7 @@ name: todo-nodejs-mongo
 metadata:
   template: todo-nodejs-mongo@0.0.1-beta
 workflows:
-  up: 
+  up:
     steps:
       - azd: provision
       - azd: deploy --all
@@ -26,14 +26,14 @@ services:
           run: 'echo "VITE_API_BASE_URL=""$env:API_BASE_URL""" > .env.local ; echo "VITE_APPLICATIONINSIGHTS_CONNECTION_STRING=""$env:APPLICATIONINSIGHTS_CONNECTION_STRING""" >> .env.local'
         posix:
           shell: sh
-          run: 'echo VITE_API_BASE_URL=\"$API_BASE_URL\" > .env.local && echo VITE_APPLICATIONINSIGHTS_CONNECTION_STRING=\"$APPLICATIONINSIGHTS_CONNECTION_STRING\" >> .env.local'    
+          run: 'echo VITE_API_BASE_URL=\"$API_BASE_URL\" > .env.local && echo VITE_APPLICATIONINSIGHTS_CONNECTION_STRING=\"$APPLICATIONINSIGHTS_CONNECTION_STRING\" >> .env.local'
       postdeploy:
         windows:
           shell: pwsh
-          run: 'rm .env.local'
+          run: "rm .env.local"
         posix:
           shell: sh
-          run: 'rm .env.local'
+          run: "rm .env.local"
   api:
     project: ./src/api
     language: js
@@ -44,45 +44,183 @@ hooks:
   # .env.local is ignored by git, so it will not be committed if, for any reason, if deployment fails.
   # see: https://vitejs.dev/guide/env-and-mode
   # Note: Notice that dotenv must be a project dependency for this to work. See package.json.
+
+  # 1. azd up
+  preup:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Output "AZD HOOK LOG : preup ================="
+        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : preup ================="
+        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+      interactive: true
+      continueOnError: false
+  postup:
+    windows:
+      shell: pwsh
+      run: ./hooks/1.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./hooks/1.sh
+      interactive: true
+      continueOnError: false
+
+  # 2. azd provision
   preprovision:
     windows:
       shell: pwsh
-      run: ./hook/preprovision.ps1
+      run: |
+        Write-Output "AZD HOOK LOG : preprovision ================="
+        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : preprovision ================="
+        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
       interactive: true
       continueOnError: false
   postprovision:
     windows:
       shell: pwsh
-      run: 'Write-Output "postprovision执行--------2.Test inline script hook-9.Multiple hooks"'
+      run: ./hooks/1.ps1
       interactive: true
       continueOnError: false
     posix:
       shell: sh
-      run: ./hook/xxx.sh
+      run: ./hooks/1.sh
       interactive: true
-      continueOnError: false
-  preup:
-    windows:
-      shell: pwsh
-      run: 'Write-Output "preup执行  $env:AZURE_ENV_NAME-------3.Test Azd vars 4.Interactive set"'
-      interactive: true
-      continueOnError: false
-  prepackage: 
-    windows:
-      shell: pwsh
-      run: Write-Output "prepackage执行------"
-      interactive: true
-      continueOnError: false
-  prerestore: #错误也执行 6.Set the "continueOnError" flag 8.Invalid file paths
-    windows:
-      shell: pwsh
-      run: ./hook/xxx.ps1
-      interactive: true
-      continueOnError: true
-  predown: # 不显示  interactive: false
-    windows:
-      shell: pwsh
-      run: Write-Output "predown执行------"
-      interactive: false
       continueOnError: false
 
+  # 3. azd package
+  # test continueOnError
+  prepackage:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Output "AZD HOOK LOG : prepackage ================="
+        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "test continueOnError "
+        Write-Outpu
+      interactive: true
+      continueOnError: true
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : prepackage ================="
+        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "test continueOnError "
+        ech
+      interactive: true
+      continueOnError: true
+  postpackage:
+    windows:
+      shell: pwsh
+      run: ./hooks/1.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./hooks/1.sh
+      interactive: true
+      continueOnError: false
+
+  # 4. azd deploy 
+  # test Invalid file paths
+  predeploy:
+    windows:
+      shell: pwsh
+      run: ./xxx/1.ps1
+      interactive: true
+      continueOnError: true
+    posix:
+      shell: sh
+      run: ./xxx/1.sh
+      interactive: true
+      continueOnError: true
+  postdeploy:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Output "AZD HOOK LOG : postdeploy ================="
+        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "test Invalid file paths "
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : postdeploy ================="
+        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "test Invalid file paths "
+      interactive: true
+      continueOnError: false
+
+  # 5. azd restore 
+  # test Interactive set false
+  prerestore:
+    windows:
+      shell: pwsh
+      run: ./hooks/1.ps1
+      interactive: false
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./hooks/1.sh
+      interactive: false
+      continueOnError: false
+  postrestore:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Output "AZD HOOK LOG : postrestore ================="
+        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+        Write-Output "test Interactive set false "
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : prerestore ================="
+        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+        echo "test Interactive set false "
+      interactive: true
+      continueOnError: false
+
+
+  # 6. azd down 
+  predown:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Output "AZD HOOK LOG : predown ================="
+        Write-Output "AZD HOOK LOG : $env:AZURE_ENV_NAME "
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: |
+        echo "AZD HOOK LOG : predown ================="
+        echo "AZD HOOK LOG : $AZURE_ENV_NAME "
+      interactive: true
+      continueOnError: false
+  postdown:
+    windows:
+      shell: pwsh
+      run: ./hooks/1.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./hooks/1.sh
+      interactive: true
+      continueOnError: false
