@@ -49,7 +49,6 @@ jobs:
             # test
             azd config show
 
-            # azd auth login --client-id ${{ parameters.clientId }}  --tenant-id ${{ parameters.tenantId }} --client-secret ${{ parameters.clientSecret }}
 
       - task: Bash@3
         displayName: Install template
