@@ -96,12 +96,16 @@ jobs:
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
-
+            # test
             azd config show
 
             pushd $(templatePath)
 
             azd up --no-prompt
+            
+            # test
+            azd package 
+            azd restore
 
             sleep 10
 
