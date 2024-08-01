@@ -91,7 +91,7 @@ jobs:
       - task: AzureCLI@2
         displayName: Run azd hooks
         inputs:
-          azureSubscription: test-connection
+          azureSubscription: tomServiceConnection1
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
