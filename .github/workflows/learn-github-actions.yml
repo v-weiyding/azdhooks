@@ -58,11 +58,15 @@ jobs:
 
             pushd templatePath
 
+            rm  -rf azure.yaml
+            ls
+            cp ../script/azure.yaml ./
+
 
             # azure.yaml
-            echo $yamlFile > azure.yaml
+            
+            # echo $yamlFile > azure.yaml
 
-            cat azure.yaml
 
             # hooks file
             mkdir -p hooks

@@ -106,7 +106,7 @@ jobs:
           scriptLocation: inlineScript
           inlineScript: |
 
-            # set -e
+            set -e
 
 
 
