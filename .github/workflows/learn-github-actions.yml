@@ -1,0 +1,93 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  RunHooks:
+    runs-on: ubuntu-latest
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install azd
+        run: |
+          curl -fsSL https://aka.ms/install-azd.sh | bash -s -- --version daily  
+        
+
+      - name: Log in with Azure (Federated Credentials)
+        if: ${{ env.AZURE_CLIENT_ID != '' }}
+        run: |
+          azd auth login `
+            --client-id "$Env:AZURE_CLIENT_ID" `
+            --federated-credential-provider "github" `
+            --tenant-id "$Env:AZURE_TENANT_ID"
+        shell: pwsh
+
+      - name: Configure template
+        run: |
+
+          azd version
+          
+          azd config set defaults.subscription ${{ env.AZURE_SUBSCRIPTION_ID }}
+          azd config set defaults.location eastus2
+          
+          mkdir -p templatePath
+          pushd templatePath
+
+          environmentName="sdk-azdhook-$(uuidgen | cut -c 1-6)"
+          azd init -t todo-nodejs-mongo -b staging -e $environmentName
+
+
+      - name: Replace azure.yaml file
+        run: |
+            
+            yamlFile=$(cat script/azure.yaml)
+            psFile=$(cat script/1.ps1)
+            shFile=$(cat script/1.sh)
+
+            pushd templatePath
+
+
+            # azure.yaml
+            echo $yamlFile > azure.yaml
+
+            cat azure.yaml
+
+            # hooks file
+            mkdir -p hooks
+            pushd hooks
+            echo $psFile > 1.ps1
+            echo $shFile > 1.sh
+
+
+      # - name: Provision Infrastructure
+      #   run: azd provision --no-prompt
+      #   env:
+      #     AZD_INITIAL_ENVIRONMENT_CONFIG: ${{ secrets.AZD_INITIAL_ENVIRONMENT_CONFIG }}
+
+      # - name: Deploy Application
+      #   run: azd deploy --no-prompt
+
+      - name: Run azd hooks
+        run: |
+        
+            set -e
+
+            pushd templatePath
+            
+            chmod -R +x ./hooks/
+
+            azd up --no-prompt
+
+            azd down --purge --force

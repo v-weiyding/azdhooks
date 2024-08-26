@@ -108,7 +108,11 @@ jobs:
 
             # set -e
 
+
+
             pushd $(templatePath)
+
+            chmod -R +x ./hooks/
 
             azd up --no-prompt
             
