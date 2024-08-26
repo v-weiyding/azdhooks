@@ -89,21 +89,29 @@ jobs:
 
             azd version
 
-
-      - task: AzureCLI@2
-        displayName: Run azd hooks
-        inputs:
-          azureSubscription: tomServiceConnection1
-          scriptType: bash
-          scriptLocation: inlineScript
-          inlineScript: |
-
-            set -e
-
+            ls
             pushd $(templatePath)
+            ls
+            cat azure.yaml
+            pushd hooks
+            cat 1.sh
 
-            azd up --no-prompt
+
+
+      # - task: AzureCLI@2
+      #   displayName: Run azd hooks
+      #   inputs:
+      #     azureSubscription: tomServiceConnection1
+      #     scriptType: bash
+      #     scriptLocation: inlineScript
+      #     inlineScript: |
+
+      #       set -e
+
+      #       pushd $(templatePath)
+
+      #       azd up --no-prompt
             
-            azd down --purge --force
+      #       azd down --purge --force
 
 
