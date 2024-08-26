@@ -98,20 +98,20 @@ jobs:
 
 
 
-      # - task: AzureCLI@2
-      #   displayName: Run azd hooks
-      #   inputs:
-      #     azureSubscription: tomServiceConnection1
-      #     scriptType: bash
-      #     scriptLocation: inlineScript
-      #     inlineScript: |
+      - task: AzureCLI@2
+        displayName: Run azd hooks
+        inputs:
+          azureSubscription: tomServiceConnection1
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
 
-      #       set -e
+            set -e
 
-      #       pushd $(templatePath)
+            pushd $(templatePath)
 
-      #       azd up --no-prompt
+            azd up --no-prompt
             
-      #       azd down --purge --force
+            azd down --purge --force
 
 
