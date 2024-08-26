@@ -10,9 +10,17 @@ parameters:
     type: string
     default: todo-nodejs-mongo
   - name: templateBranch
-    displayName: Template Name
+    displayName: Template Branch
     type: string
-    default: pr/3976
+    default: staging
+  - name: subscriptionId
+    displayName: subscription id
+    type: string
+  - name: location
+    displayName: location
+    type: string
+    default: "eastus2"
+
 
 variables:
   - name: templatePath
@@ -29,25 +37,7 @@ jobs:
           targetType: inline
           script: |
 
-            # test 
-            ls
-
-            # 可能会要求输入密码 sudo
             curl -fsSL https://aka.ms/install-azd.sh | bash -s -- --version daily
-
-            azd version
-
-            azd config set auth.useAzCliAuth "true"
-
-            # test
-            azd config show
-
-
-            azd config set defaults.subscription "faa080af-c1d8-40ad-9cce-e1a450ca5b57"
-            azd config set defaults.location eastus2
-
-            # test
-            azd config show
 
 
       - task: Bash@3
@@ -55,13 +45,18 @@ jobs:
         inputs:
           targetType: inline
           script: |
+
+            azd config set auth.useAzCliAuth "true"
+            azd config set defaults.subscription  ${{ parameters.subscriptionId }}
+            azd config set defaults.location ${{ parameters.location }}
+
+
             mkdir -p $(templatePath)
             pushd $(templatePath)
 
             environmentName="sdkazdhook$(uuidgen | cut -c 1-6)"
             azd init -t ${{ parameters.templateName }} -b ${{ parameters.templateBranch }} -e $environmentName
 
-            popd
 
       - task: Bash@3
         displayName: Replace azure.yaml file
@@ -85,8 +80,15 @@ jobs:
             echo $psFile > 1.ps1
             echo $shFile > 1.sh
 
-            popd
-            popd
+
+      - task: Bash@3
+        displayName: Show version
+        inputs:
+          targetType: inline
+          script: |
+
+            azd version
+
 
       - task: AzureCLI@2
         displayName: Run azd hooks
@@ -95,39 +97,13 @@ jobs:
           scriptType: bash
           scriptLocation: inlineScript
           inlineScript: |
-            # test
-            azd config show
+
+            set -e
 
             pushd $(templatePath)
 
             azd up --no-prompt
             
-            # test
-            azd package 
-            azd restore
-
-            sleep 10
-
             azd down --purge --force
 
 
-            popd
-
-      - task: Bash@3
-        displayName: Run azd hooks test
-        inputs:
-          targetType: inline
-          script: |
-
-            azd config show
-
-            pushd $(templatePath)
-
-            azd up --no-prompt
-
-            sleep 10
-
-            azd down --purge --force
-
-
-            popd
