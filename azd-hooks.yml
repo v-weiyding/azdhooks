@@ -25,8 +25,6 @@ parameters:
 variables:
   - name: templatePath
     value: template
-  - name: ScriptPath
-    value: script
 
 jobs:
   - job: RunHooks
@@ -64,21 +62,18 @@ jobs:
           targetType: inline
           script: |
 
-            yamlFile=$(cat $(ScriptPath)/azure.yaml)
-            psFile=$(cat $(ScriptPath)/1.ps1)
-            shFile=$(cat $(ScriptPath)/1.sh)
-
             pushd $(templatePath)
 
 
             # azure.yaml
-            echo $yamlFile > azure.yaml
+            rm -rf azure.yaml
+            cp ../script/azure.yaml ./
+
 
             # hooks file
             mkdir -p hooks
-            pushd hooks
-            echo $psFile > 1.ps1
-            echo $shFile > 1.sh
+            cp ../script/1.ps1 ./hooks
+            cp ../script/1.sh ./hooks  
 
 
       - task: Bash@3
@@ -89,15 +84,6 @@ jobs:
 
             azd version
 
-            ls
-            pushd $(templatePath)
-            ls
-            cat azure.yaml
-            pushd hooks
-            cat 1.sh
-
-
-
       - task: AzureCLI@2
         displayName: Run azd hooks
         inputs:
@@ -107,7 +93,6 @@ jobs:
           inlineScript: |
 
             set -e
-
 
 
             pushd $(templatePath)
