@@ -75,14 +75,14 @@ jobs:
 
 
       # - name: Run azd hooks
-        run: |
+        # run: |
         
-            set -e
+        #     set -e
 
-            pushd templatePath
+        #     pushd templatePath
             
-            chmod -R +x ./hooks/
+        #     chmod -R +x ./hooks/
 
-            azd up --no-prompt
+        #     azd up --no-prompt
 
-            azd down --purge --force
+        #     azd down --purge --force
