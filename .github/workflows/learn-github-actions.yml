@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   RunHooks:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -25,57 +25,56 @@ jobs:
           curl -fsSL https://aka.ms/install-azd.sh | bash -s -- --version daily  
         
 
-      - name: Log in with Azure (Federated Credentials)
-        if: ${{ env.AZURE_CLIENT_ID != '' }}
-        run: |
-          azd auth login `
-            --client-id "$Env:AZURE_CLIENT_ID" `
-            --federated-credential-provider "github" `
-            --tenant-id "$Env:AZURE_TENANT_ID"
-        shell: pwsh
 
       - name: Configure template
         run: |
 
           azd version
+
+      # - name: Log in with Azure (Federated Credentials)
+      #   if: ${{ env.AZURE_CLIENT_ID != '' }}
+      #   run: |
+      #     azd auth login `
+      #       --client-id "$Env:AZURE_CLIENT_ID" `
+      #       --federated-credential-provider "github" `
+      #       --tenant-id "$Env:AZURE_TENANT_ID"
+      #   shell: pwsh
+
+      # - name: Configure template
+      #   run: |
+
+      #     azd version
           
-          azd config set defaults.subscription ${{ env.AZURE_SUBSCRIPTION_ID }}
-          azd config set defaults.location eastus2
+      #     azd config set defaults.subscription ${{ env.AZURE_SUBSCRIPTION_ID }}
+      #     azd config set defaults.location eastus2
           
-          mkdir -p templatePath
-          pushd templatePath
+      #     mkdir -p templatePath
+      #     pushd templatePath
 
-          environmentName="sdk-azdhook-$(uuidgen | cut -c 1-6)"
-          azd init -t todo-nodejs-mongo -b staging -e $environmentName
+      #     environmentName="sdk-azdhook-$(uuidgen | cut -c 1-6)"
+      #     azd init -t todo-nodejs-mongo -b staging -e $environmentName
 
 
-      - name: Replace azure.yaml file
-        run: |
+      # - name: Replace azure.yaml file
+      #   run: |
             
 
-            pushd templatePath
+      #       pushd templatePath
 
-            # azure.yaml
-            rm -rf azure.yaml
-            cp ../script/azure.yaml ./
-
-
-            # hooks file
-            mkdir -p hooks
-            cp ../script/1.ps1 ./hooks
-            cp ../script/1.sh ./hooks     
+      #       # azure.yaml
+      #       rm -rf azure.yaml
+      #       cp ../script/azure.yaml ./
 
 
+      #       # hooks file
+      #       mkdir -p hooks
+      #       cp ../script/1.ps1 ./hooks
+      #       cp ../script/1.sh ./hooks     
 
-      # - name: Provision Infrastructure
-      #   run: azd provision --no-prompt
-      #   env:
-      #     AZD_INITIAL_ENVIRONMENT_CONFIG: ${{ secrets.AZD_INITIAL_ENVIRONMENT_CONFIG }}
 
-      # - name: Deploy Application
-      #   run: azd deploy --no-prompt
 
-      - name: Run azd hooks
+
+      # - name: Run azd hooks
         run: |
         
             set -e
