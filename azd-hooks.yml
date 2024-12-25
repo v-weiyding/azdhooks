@@ -1,4 +1,4 @@
-name: Run azd hooks
+name: Run azd hooks(todo-nodejs-mongo-tomServiceConnection1)
 trigger: none
 
 pool:
@@ -16,6 +16,7 @@ parameters:
   - name: subscriptionId
     displayName: subscription id
     type: string
+    default: "faa080af-c1d8-40ad-9cce-e1a450ca5b57"
   - name: location
     displayName: location
     type: string
